@@ -6,8 +6,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config import BOT_TOKEN, DIARY_URL
-from funcs import check_authorization, register_user
-from keyboards import kb_base, login_kb, creation_kb
+from funcs import check_authorization, register_user, check_login, find_student, link_student
+from keyboards import kb_base, login_kb, creation_kb, connect_kb
 import requests
 
 storage = MemoryStorage()
@@ -19,6 +19,11 @@ class FSMLogin(StatesGroup):
     not_login = State()
     login = State()
     password = State()
+
+
+class FSMStudentLogin(StatesGroup):
+    student_login = State()
+    student_password = State()
 
 
 async def start(_):
@@ -45,8 +50,9 @@ async def base_handler(message: types.Message):
                                  'Want to login?', reply_markup=login_kb)
         else:
             await message.reply('Choose model to create', reply_markup=creation_kb)
-    elif message.text == 'Get chat ID':
-        await message.reply(f'Your chat ID is: `{chat_id}`, press it to copy', parse_mode='markdown')
+    elif message.text == 'Connect for notifications':
+        await message.reply(f'If you want to connect your Diary account to this Telegram, click *proceed*',
+                            parse_mode='markdown', reply_markup=connect_kb)
     else:
         await message.reply('Unknown command')
 
@@ -59,11 +65,14 @@ async def answer_callback(call: types.CallbackQuery):
     elif call.data == 'login_no':
         await call.message.answer('Choose option', reply_markup=kb_base)
     elif call.data == 'create_school':
-        await call.message.answer('creating school')
+        await call.message.answer('creating school, TBD')
         await call.message.delete_reply_markup()
     elif call.data == 'create_admin':
-        await call.message.answer('creating admin')
+        await call.message.answer('creating admin, TBD')
         await call.message.delete_reply_markup()
+    elif call.data == 'proceed':
+        await call.message.answer('Login')
+        await FSMStudentLogin.student_login.set()
 
 
 @dp.message_handler(content_types=['text'], state=FSMLogin.login)
@@ -74,25 +83,40 @@ async def get_login(message: types.Message, state: FSMContext):
     await message.answer('Password:')
 
 
-@dp.message_handler(content_types=['text'], state=FSMLogin.password)
-async def submit_login(message: types.Message, state: FSMContext):
+@dp.message_handler(content_types=['text'], state=FSMStudentLogin.student_login)
+async def get_login(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['login'] = message.text
+    await FSMStudentLogin.next()
+    await message.answer('Password:')
+
+
+@dp.message_handler(content_types=['text'], state=FSMStudentLogin.student_password)
+async def login_student(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         login = data['login']
         password = message.text
-        await message.answer(f'{login} {password}')
+        chat_id = message.chat.id
+        await message.answer('Checking auth data')
+        await message.delete()
+        id = find_student(login, password)
+        if not find_student(login, password):
+            await bot.send_message(chat_id, 'wrong credentials')
+            await FSMStudentLogin.student_login.set()
+        else:
+            link_student(id, chat_id)
+            await bot.send_message(chat_id, 'Connected!')
+            await FSMStudentLogin.student_login.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSMLogin.password)
+async def login_admin(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        login = data['login']
+        password = message.text
         chat_id = message.chat.id
         await message.delete()
-        headers = {
-            'accept': 'application/json',
-        }
-
-        data = {
-            'username': login,
-            'password': password,
-            'client_id': 'admin',
-        }
-
-        response = requests.post(f'{DIARY_URL}/token', headers=headers, data=data)
+        response = check_login(login, password, 'admin')
 
         if response.ok:
             if not register_user(chat_id):
