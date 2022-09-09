@@ -8,7 +8,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from config import BOT_TOKEN, DIARY_URL
 from funcs import check_authorization, register_user, check_login, find_student, link_student
 from keyboards import kb_base, login_kb, creation_kb, connect_kb
-import requests
 
 storage = MemoryStorage()
 bot = Bot(token=BOT_TOKEN)

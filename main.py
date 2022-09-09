@@ -1,7 +1,7 @@
 import uvicorn as uvicorn
 from fastapi import FastAPI
 
-from telegram.bot import bot
+from DiaryTelegramBot.telegram.bot import bot
 
 app = FastAPI()
 

@@ -4,7 +4,7 @@ from contextlib import closing
 import requests
 from passlib.context import CryptContext
 
-from DiaryTelegramBot.telegram.config import DIARY_URL
+from config import DIARY_URL
 from telegram_db import DB_NAME, USERNAME, DB_PASS, DB_HOST
 
 
@@ -55,4 +55,9 @@ def find_student(login: str, password: str):
 
 
 def link_student(diary_id, chat_id):
-    print(diary_id, chat_id)
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USERNAME,
+                                  password=DB_PASS, host=DB_HOST)) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f'update users set telegram_chat_id = %s where diary_id = %s', (chat_id, diary_id))
+            conn.commit()
+    return True
