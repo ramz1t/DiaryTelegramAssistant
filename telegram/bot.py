@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -129,4 +131,8 @@ async def login_admin(message: types.Message, state: FSMContext):
             await FSMLogin.not_login.set()
 
 
+PORT = int(os.environ.get('PORT', 5000))
+
 executor.start_polling(dp, skip_updates=True, on_startup=start)
+executor.start_webhook(listen="0.0.0.0", port=int(PORT), webhook_path=BOT_TOKEN, dispatcher=dp)
+executor.set_webhook(webhook_path='https://yourherokuappname.herokuapp.com/' + BOT_TOKEN, dispatcher=dp)
