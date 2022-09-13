@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -5,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.executor import start_webhook
 
-from config import BOT_TOKEN, DIARY_URL
+from config import BOT_TOKEN
 from funcs import check_authorization, register_user, check_login, find_student, link_student
 from keyboards import kb_base, login_kb, creation_kb, connect_kb
 
@@ -129,4 +131,26 @@ async def login_admin(message: types.Message, state: FSMContext):
             await FSMLogin.not_login.set()
 
 
-start_webhook(webhook_path='https://diary-telegram.herokuapp.com/' + BOT_TOKEN, dispatcher=dp)
+async def on_startup(dispatcher):
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+
+
+async def on_shutdown(dispatcher):
+    await bot.delete_webhook()
+
+
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = os.getenv('PORT', default=8000)
+WEBHOOK_HOST = 'https://diary-telegram.herokuapp.com/'
+WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+
+start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        skip_updates=True,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
