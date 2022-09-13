@@ -26,3 +26,10 @@ proceed = InlineKeyboardButton(text='Proceed', callback_data='proceed')
 
 connect_kb = InlineKeyboardMarkup()
 connect_kb.add(proceed)
+
+'''Student try again keyboard'''
+yes = InlineKeyboardButton(text='Yes', callback_data='proceed')
+no = InlineKeyboardButton(text='No', callback_data='no')
+
+try_again_kb = InlineKeyboardMarkup(row_width=2)
+try_again_kb.add(yes, no)
