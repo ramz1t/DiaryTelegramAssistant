@@ -141,7 +141,7 @@ async def on_shutdown(dispatcher):
 
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = os.getenv('PORT', default=8000)
-WEBHOOK_HOST = 'https://diary-telegram.herokuapp.com/'
+WEBHOOK_HOST = 'https://diary-telegram.herokuapp.com'
 WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 
