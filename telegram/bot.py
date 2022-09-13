@@ -1,11 +1,9 @@
-import os
-
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
-from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.executor import start_webhook
 
 from config import BOT_TOKEN, DIARY_URL
 from funcs import check_authorization, register_user, check_login, find_student, link_student
@@ -131,4 +129,4 @@ async def login_admin(message: types.Message, state: FSMContext):
             await FSMLogin.not_login.set()
 
 
-executor.start_webhook(webhook_path='https://diary-telegram.herokuapp.com/' + BOT_TOKEN, dispatcher=dp)
+start_webhook(webhook_path='https://diary-telegram.herokuapp.com/' + BOT_TOKEN, dispatcher=dp)

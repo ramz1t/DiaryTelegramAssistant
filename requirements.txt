@@ -5,3 +5,4 @@ fastapi
 uvicorn
 passlib
 bcrypt
+requests
