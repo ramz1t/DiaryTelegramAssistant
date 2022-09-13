@@ -36,9 +36,9 @@ async def start(_):
 @dp.message_handler(commands=['start'])
 async def greet_new_user(message: types.Message):
     await FSMStudentLogin.not_login.set()
-    path = os.getcwd() + '/static/hello.webp'
-    sticker = open(path, 'rb')
-    await bot.send_sticker(chat_id=message.chat.id, sticker=sticker)
+    # path = os.getcwd() + '/static/hello.webp'
+    # sticker = open(path, 'rb')
+    # await bot.send_sticker(chat_id=message.chat.id, sticker=sticker)
     await message.reply(f'Hello <b>{message.from_user.username}</b>!\n'
                         f'This bot is made for <b>Diary</b> web application, please choose your problem',
                         parse_mode='html', reply_markup=kb_base)
