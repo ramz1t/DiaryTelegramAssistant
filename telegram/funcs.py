@@ -4,8 +4,11 @@ from contextlib import closing
 import requests
 from passlib.context import CryptContext
 
-from config import DIARY_URL
+
 from telegram_db import DB_NAME, USERNAME, DB_PASS, DB_HOST
+
+
+DIARY_URL = 'http://127.0.0.1:8000'
 
 
 def check_authorization(chat_id: int):
